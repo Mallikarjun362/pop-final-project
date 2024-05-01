@@ -1,73 +1,71 @@
-// CUDA CONVOLUTION KERNEL
-__global__ void conv2Dkernel_base(DATA_TYPE *X, DATA_TYPE *Y, const int IMAGE_SIZE)
-{
-	int i = blockIdx.x * blockDim.x + threadIdx.x;
-	int j = blockIdx.y * blockDim.y + threadIdx.y;
+// CONVOLUTION CUDA
+#include <cuda.h>
+#include <cuda_runtime.h>
 
-	DATA_TYPE c11, c12, c13, c21, c22, c23, c31, c32, c33;
+__global__ void convolution_kernel(
+    const float* input, const float* filter, float* output,
+    int input_width, int input_height, int filter_width, int filter_height
+) {
+  // Thread ID and block dimensions
+  int tid = threadIdx.x;
+  int bid = blockIdx.x;
+  int threads_per_block = blockDim.x;
 
-	// CONV KERNEL 3x3
-	c11 = +0.2; c12 = -0.3; c13 = +0.4;
-	c21 = +0.5; c22 = +0.6; c23 = +0.7;
-	c31 = -0.8; c32 = -0.9; c33 = +0.10;
+  // Calculate output element coordinates
+  int output_x = bid * threads_per_block + tid;
+  int output_y = blockIdx.y;
 
-	if ((i < IMAGE_SIZE - 1) && (j < IMAGE_SIZE - 1) && (i > 0) && (j > 0))
-	{
-		Y[i * IMAGE_SIZE + j] = c11 * X[(i - 1) * IMAGE_SIZE + (j - 1)] + c21 * X[(i - 1) * IMAGE_SIZE + (j + 0)] + c31 * X[(i - 1) * IMAGE_SIZE + (j + 1)] +
-								  c12 * X[(i + 0) * IMAGE_SIZE + (j - 1)] + c22 * X[(i + 0) * IMAGE_SIZE + (j + 0)] + c32 * X[(i + 0) * IMAGE_SIZE + (j + 1)] +
-								  c13 * X[(i + 1) * IMAGE_SIZE + (j - 1)] + c23 * X[(i + 1) * IMAGE_SIZE + (j + 0)] + c33 * X[(i + 1) * IMAGE_SIZE + (j + 1)];
-	}
+  // Check if within output bounds
+  if (output_x >= input_width || output_y >= input_height) return;
+
+  // Calculate padding and stride (assuming padding = 1, stride = 1)
+  int padding = (filter_width - 1) / 2;
+
+  // Temporary buffer for input elements
+  float iTemp[filter_width];
+
+  // Load first and last elements for each thread
+  iTemp[0] = input[(output_y * input_width) + output_x];
+  iTemp[filter_width - 1] = input[(output_y * input_width) + output_x + filter_width - 1];
+
+  // Apply column reuse optimization (Algorithm 1)
+  if (tid < threads_per_block - 2) {
+    unsigned long long exchange;
+    asm volatile ("mov.b64 %0, {%1, %2};" : "=l"(exchange) : "r"(iTemp[0]), "r"(iTemp[filter_width - 1]));
+    int shift = ((tid + 2) & 2) << 4;
+    asm volatile ("shr.b64 %0, %1, %2;" : "=l"(exchange) : "r"(exchange), "r"(shift));
+    asm volatile ("mov.b64 {%0, %1}, %2;" : "=r"(iTemp[1]), "=r"(iTemp[2]) : "l"(exchange));
+    iTemp[2] = __shfl_xor(iTemp[1], 2);
+  }
+  __syncthreads();
+
+  // Perform convolution for the current output element
+  float sum = 0.0f;
+  for (int fy = 0; fy < filter_height; fy++) {
+    for (int fx = 0; fx < filter_width; fx++) {
+      int input_x = output_x + fx - padding;
+      int input_y = output_y + fy - padding;
+
+      // Check if within input bounds (ignoring padding)
+      if (input_x >= 0 && input_x < input_width && input_y >= 0 && input_y < input_height) {
+        sum += iTemp[fx] * filter[(fy * filter_width) + fx];
+      }
+    }
+  }
+  output[(output_y * input_width) + output_x] = sum;
 }
 
-// CONVOLUTION CUDA
-double conv2DCuda_base(DATA_TYPE *IMG_IN_H, DATA_TYPE *IMG_OUT_H, const int IMAGE_SIZE)
+// Host code to launch kernel
+double A2ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE_SIZE, int FILTER_SIZE)
 {
-	// DEFINING NEW GPU MEMORY POINTERS
-	DATA_TYPE *IMG_IN_D;
-	DATA_TYPE *IMG_OUT_D;
-	const int SIZE_IN_BYTES = sizeof(DATA_TYPE) * IMAGE_SIZE * IMAGE_SIZE;
+    // Define block and grid sizes
+    int threads_per_block = 32;
+    int blocks_per_grid_x = (IMAGE_SIZE + threads_per_block - 1) / threads_per_block;
+    int blocks_per_grid_y = IMAGE_SIZE;
 
-	// ALLOCATING GPU MEMORY
-	cudaMalloc((void **)&IMG_IN_D, SIZE_IN_BYTES);
-	cudaMalloc((void **)&IMG_OUT_D, SIZE_IN_BYTES);
-
-	// COPYING PROBLEM VARIABLE TO GPU
-	cudaMemcpy(IMG_IN_D, IMG_IN_H, SIZE_IN_BYTES, cudaMemcpyHostToDevice);
-
-	// DEFINING DIMENSIONS OF THE KERNEL EXECUTION
-    dim3 block(THREAD_BLOCK_DIM_X, THREAD_BLOCK_DIM_Y);
-	dim3 grid(
-		(size_t) ceil( ((float) IMAGE_SIZE) / ((float) block.x) ), 
-		(size_t) ceil( ((float) IMAGE_SIZE) / ((float) block.y) ) 
-	);
-
-	// MEASURING THE EXECUTION TIME
-	clock_t t;
-	t = clock();
-
-	// KERNEL INVOCATION
-	conv2Dkernel_base<<<grid, block>>>(IMG_IN_D, IMG_OUT_D, IMAGE_SIZE);
-	cudaDeviceSynchronize();
-
-	// MEASURING AND DISPLAYING EXECUTION TIMR
-	t = clock() - t;
-	double time_taken_in_seconds = ((double)t) / CLOCKS_PER_SEC;
-
-    // CUDA ERROR DETECTION
-    cudaError_t err = cudaGetLastError();
-	if (err != cudaSuccess && false){
-		printf("CUDA Error - %s : %s\n",cudaGetErrorName(err), cudaGetErrorString(err));
-	}
-
-    // DISPLAYING RESULTS
-	// printf("CUDA Runtime: %f\n", time_taken_in_seconds);
-
-	// COPYING RESULT VARIABL TO HOST
-	cudaMemcpy(IMG_OUT_H, IMG_OUT_D, SIZE_IN_BYTES, cudaMemcpyDeviceToHost);
-
-	// FREEING GPU MEMORY
-	cudaFree(IMG_IN_D);
-	cudaFree(IMG_OUT_D);
-
-	return time_taken_in_seconds;
+    dim3 block_size(threads_per_block);
+    dim3 grid_size(blocks_per_grid_x, blocks_per_grid_y);
+    // Launch kernel
+    convolution_kernel<<<grid_size, block_size>>>(input, filter, output, IMAGE_SIZE, IMAGE_SIZE, FILTER_SIZE, FILTER_SIZE);
+    cudaDeviceSynchronize();	
 }

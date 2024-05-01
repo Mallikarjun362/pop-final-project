@@ -16,14 +16,17 @@
 typedef float DATA_TYPE;
 
 // ----------------------- CUSTOME LIBRARIES -----------------------
-// ALGORITHMS
 #include "utils.cu"
+
+// 1. ALGORITHMS
 // #include "A1RowReuse.cu"
-// #include "A2ColumnReuse.cu"
+#include "A2ColumnReuse.cu"
 // #include "A3RowReuseModified.cu"
 // #include "A4ColumnReuseModified.cu"
-// STANDARD IMPLEMENTATIONS
-#include "stdCudnn_winograd.cu"
+
+// 2. STANDARD IMPLEMENTATIONS
+// #include "stdCudnn_winograd.cu"
+#include "stdCudnn.cu"
 #include "stdHost.cu"
 // UTILITIES
 
@@ -38,30 +41,32 @@ int main(int argc, char *argv[])
 	int FILTER_SIZE_IN_BYTES = sizeof(DATA_TYPE) * FILTER_SIZE * FILTER_SIZE;
 
 	// CPU-HOST VARIABLES
-	DATA_TYPE *IMG_IN, *IMG_OUT, *KERNEL_IN;
+	DATA_TYPE *IMG_IN, *IMG_OUT, *FILTER_IN;
 	
 	IMG_IN = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
 	IMG_OUT = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
-	KERNEL_IN = (DATA_TYPE *)malloc(FILTER_SIZE_IN_BYTES);
+	FILTER_IN = (DATA_TYPE *)malloc(FILTER_SIZE_IN_BYTES);
 
 	initializeImage(IMG_IN, IMAGE_SIZE, IMAGE_SIZE);
-	initializeImage(KERNEL_IN, FILTER_SIZE, FILTER_SIZE);
+	initializeImage(FILTER_IN, FILTER_SIZE, FILTER_SIZE);
 
-	// PART 2 : COMPUTATION
+	// ------------------------ PART 2 : COMPUTATION ------------------------
     // COMPUTING RESULTS
-	double t_h = myStdHost(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, FILTER_SIZE);
-	double t_cudnn_winograd = myStdCudnn_winograd(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, FILTER_SIZE);
+	double t_h = myStdHost(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
+	double t_cudnn = myStdCudnn(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
 
-	// double t_a1 = A1(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, FILTER_SIZE);
-	// double t_a2 = A2(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, FILTER_SIZE);
-	// double t_a3 = A3(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, FILTER_SIZE);
-	// double t_a4 = A4(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, FILTER_SIZE);
+	// double t_a1 = A1(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
+	double t_a2 = A2ColumnReuse(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
+	// double t_a3 = A3(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
+	// double t_a4 = A4(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
 
+	// ------------------------------------------------------------------------ 
+	
 	printf("Host : %f\n",t_h);
-	printf("Winograd : %f\n",t_cudnn_winograd);
+	printf("Cudnn : %f\n",t_cudnn);
+	printf("Column Reuse : %f\n",t_a2);
 	
 	// PART 3 : DISPLAY EXECUTION TIME
-	printf("END");
 	free(IMG_IN);
 	return 0;
 }

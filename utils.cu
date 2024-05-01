@@ -9,19 +9,11 @@
 // typedef float DATA_TYPE;
 
 // -------------------- UTIL CODE BLOCKS --------------------
-
-// INITIALIZE IMAGE
-void initializeImage(DATA_TYPE *IMG, const int height, const int width)
-{
-	int i, j;
-
-	for (i = 0; i < height; ++i)
-	{
-		for (j = 0; j < width; ++j)
-		{
-			IMG[i * height + j] = (float) rand() / RAND_MAX;
-		}
-	}
+void initializeImage(float *img, int size) {
+	int size_squared = size * size;
+    for (int i = 0; i < size_squared; ++i) {
+        img[i] = (float)rand() / RAND_MAX;
+    }
 }
 
 // ABSOLUTE VALUE OF THE INPUT
