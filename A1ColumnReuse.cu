@@ -68,7 +68,7 @@ __global__ void convolution_kernel(
 }
 
 // Host code to launch kernel
-double A2ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE_SIZE, int FILTER_SIZE)
+double A1ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE_SIZE, int FILTER_SIZE)
 {
     int imgBytes = IMAGE_SIZE * IMAGE_SIZE * sizeof(float);
     int filterBytes = FILTER_SIZE * FILTER_SIZE * sizeof(float);
