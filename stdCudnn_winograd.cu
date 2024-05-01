@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "utils.cu"
 
 #define TILE_SIZE 2
 
