@@ -1,16 +1,19 @@
 // CONVOLUTION CUDA
 #include <cuda.h>
 #include <cuda_runtime.h>
-#define FILTER_WIDTH 5
+#define FILTER_WIDTH 3
+#define FILTER_HEIGHT 3
 
 __global__ void convolution_kernel(
     const float* input, const float* filter, float* output,
-    int input_width, int input_height, int filter_width, int filter_height
+    int input_width, int input_height, 
+    int filter_width, int filter_height
 ) {
   // Thread ID and block dimensions
   int tid = threadIdx.x;
   int bid = blockIdx.x;
   int threads_per_block = blockDim.x;
+
 
   // Calculate output element coordinates
   int output_x = bid * threads_per_block + tid;
@@ -18,6 +21,7 @@ __global__ void convolution_kernel(
 
   // Check if within output bounds
   if (output_x >= input_width || output_y >= input_height) return;
+  if (output_x + FILTER_WIDTH - 1 >= input_width || output_y + FILTER_HEIGHT - 1 >= input_height) return;
 
   // Calculate padding and stride (assuming padding = 1, stride = 1)
   int padding = (FILTER_WIDTH - 1) / 2;
@@ -80,7 +84,7 @@ double A2ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE
     cudaMemcpy(d_filter, FILTER_IN, filterBytes, cudaMemcpyHostToDevice);
 
     // Define block and grid sizes
-    int threads_per_block = 32;
+    int threads_per_block = 1024;
     int blocks_per_grid_x = (IMAGE_SIZE + threads_per_block - 1) / threads_per_block;
     int blocks_per_grid_y = IMAGE_SIZE;
 
@@ -113,9 +117,9 @@ double A2ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE
         printf("\n");
     }
     printf("Output:\n");
-    for (int i = 0; i < IMAGE_SIZE - FILTER_SIZE + 1; ++i) {
-        for (int j = 0; j < IMAGE_SIZE - FILTER_SIZE + 1; ++j) {
-            printf("%f ", h_output[i * (IMAGE_SIZE - FILTER_SIZE + 1) + j]);
+    for (int i = 0; i < IMAGE_SIZE; ++i) {
+        for (int j = 0; j < IMAGE_SIZE; ++j) {
+            printf("%f ", (float) h_output[i * (IMAGE_SIZE) + j]);
         }
         printf("\n");
     }

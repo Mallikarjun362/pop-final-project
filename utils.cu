@@ -12,7 +12,8 @@
 void initializeImage(float *img, int size) {
 	int size_squared = size * size;
     for (int i = 0; i < size_squared; ++i) {
-        img[i] = (float)rand() / RAND_MAX;
+        img[i] = (float) (rand() % 100 + 1);
+        // rand() / RAND_MAX;
     }
 }
 

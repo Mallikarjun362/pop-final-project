@@ -41,14 +41,18 @@ int main(int argc, char *argv[])
 	int FILTER_SIZE_IN_BYTES = sizeof(DATA_TYPE) * FILTER_SIZE * FILTER_SIZE;
 
 	// CPU-HOST VARIABLES
-	DATA_TYPE *IMG_IN, *IMG_OUT, *FILTER_IN;
+	// DATA_TYPE *IMG_IN, 
+  DATA_TYPE *IMG_OUT;
+  	// DATA_TYPE *FILTER_IN;
+  DATA_TYPE	FILTER_IN[] = {1,1,1, 1,1,1, 1,1,1};
+  DATA_TYPE	IMG_IN[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1};
 	
-	IMG_IN = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
+	// IMG_IN = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
 	IMG_OUT = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
-	FILTER_IN = (DATA_TYPE *)malloc(FILTER_SIZE_IN_BYTES);
+	// FILTER_IN = (DATA_TYPE *)malloc(FILTER_SIZE_IN_BYTES);
 
-	initializeImage(IMG_IN, IMAGE_SIZE);
-	initializeImage(FILTER_IN, FILTER_SIZE);
+	// initializeImage(IMG_IN, IMAGE_SIZE);
+	// initializeImage(FILTER_IN, FILTER_SIZE);
 
 	// ------------------------ PART 2 : COMPUTATION ------------------------
     // COMPUTING RESULTS
@@ -67,6 +71,6 @@ int main(int argc, char *argv[])
 	printf("Column Reuse : %f\n",t_a2);
 	
 	// PART 3 : DISPLAY EXECUTION TIME
-	free(IMG_IN);
+	// free(IMG_IN);
 	return 0;
 }
