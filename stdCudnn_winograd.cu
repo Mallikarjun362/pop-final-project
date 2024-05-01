@@ -111,7 +111,7 @@ double myStdCudnn_winograd(float* IMG_IN, float* IMG_OUT, float* FILTER_IN, cons
     cudaDeviceSynchronize();
 
     t = clock() - t;
-	  double time_taken_in_seconds = ((double)t) / CLOCKS_PER_SEC;
+	double time_taken_in_seconds = ((double)t) / CLOCKS_PER_SEC;
 
     // Copy output data from device to host
     cudaMemcpy(h_output_current, d_output, MEM_SIZE_IMG, cudaMemcpyDeviceToHost);

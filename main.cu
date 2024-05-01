@@ -61,8 +61,6 @@ int main(int argc, char *argv[])
 
 	// double t_a1 = A1(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
 	double t_a2 = A2ColumnReuse(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
-	// double t_a3 = A3(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
-	// double t_a4 = A4(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
 
 	// ------------------------------------------------------------------------ 
 	
