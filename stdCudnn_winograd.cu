@@ -103,21 +103,20 @@ double myStdCudnn_winograd(float* IMG_IN, float* IMG_OUT, float* FILTER_IN, cons
     // Launch CUDA kernel for Winograd convolution
     dim3 blockDim(2, 2);
     dim3 gridDim((IMAGE_SIZE + blockDim.x - 1) / blockDim.x, (IMAGE_SIZE + blockDim.y - 1) / blockDim.y);
+
+    clock_t t;
+	  t = clock();
     
     winograd_convolution<<<gridDim, blockDim>>>(d_input, d_filter, d_output, IMAGE_SIZE, IMAGE_SIZE);
+    cudaDeviceSynchronize();
+
+    t = clock() - t;
+	  double time_taken_in_seconds = ((double)t) / CLOCKS_PER_SEC;
 
     // Copy output data from device to host
     cudaMemcpy(h_output_current, d_output, MEM_SIZE_IMG, cudaMemcpyDeviceToHost);
 
     resultAccuracy(IMG_OUT, h_output_current, IMAGE_SIZE);
-
-    // Print output
-    for (int i = 0; i < IMAGE_SIZE; ++i) {
-        for (int j = 0; j < IMAGE_SIZE; ++j) {
-            printf("%f ", h_output[i * IMAGE_SIZE + j]);
-        }
-        printf("\n");
-    }
 
     // Free memory
     free(h_output_current);

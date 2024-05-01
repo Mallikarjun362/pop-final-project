@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 	int IMAGE_SIZE = atoi(argv[1]);
 	int IMG_SIZE_IN_BYTES = sizeof(DATA_TYPE) * IMAGE_SIZE * IMAGE_SIZE;
 	int FILTER_SIZE_IN_BYTES = sizeof(DATA_TYPE) * FILTER_SIZE * FILTER_SIZE;
-	
+
 	// CPU-HOST VARIABLES
 	DATA_TYPE *IMG_IN, *IMG_OUT, *KERNEL_IN;
 	
@@ -56,7 +56,9 @@ int main(int argc, char *argv[])
 	// double t_a2 = A2(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, FILTER_SIZE);
 	// double t_a3 = A3(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, FILTER_SIZE);
 	// double t_a4 = A4(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, FILTER_SIZE);
+
 	printf("Host : %f\n",t_h);
+	printf("Winograd : %f\n",t_cudnn_winograd);
 	
 	// PART 3 : DISPLAY EXECUTION TIME
 	printf("END");
