@@ -58,6 +58,17 @@ __global__ void convolution_kernel(
 // Host code to launch kernel
 double A2ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE_SIZE, int FILTER_SIZE)
 {
+    int imgBytes = IMAGE_SIZE * IMAGE_SIZE * sizeof(float);
+    int filterBytes = FILTER_SIZE * FILTER_SIZE * sizeof(float);
+
+    float *d_input, *d_filter, *d_output;
+    cudaMalloc(&d_input, imgBytes);
+    cudaMalloc(&d_filter, filterBytes);
+    cudaMalloc(&d_output, imgBytes);
+
+    cudaMemcpy(d_input, IMG_IN, imgBytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_filter, FILTER_IN, filterBytes, cudaMemcpyHostToDevice);
+
     // Define block and grid sizes
     int threads_per_block = 32;
     int blocks_per_grid_x = (IMAGE_SIZE + threads_per_block - 1) / threads_per_block;
@@ -66,6 +77,14 @@ double A2ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE
     dim3 block_size(threads_per_block);
     dim3 grid_size(blocks_per_grid_x, blocks_per_grid_y);
     // Launch kernel
-    convolution_kernel<<<grid_size, block_size>>>(input, filter, output, IMAGE_SIZE, IMAGE_SIZE, FILTER_SIZE, FILTER_SIZE);
-    cudaDeviceSynchronize();	
+    clock_t t;
+    t = clock();
+    
+    convolution_kernel<<<grid_size, block_size>>>(d_input, d_filter, d_output, IMAGE_SIZE, IMAGE_SIZE, FILTER_SIZE, FILTER_SIZE);
+    cudaDeviceSynchronize();
+
+    t = clock() - t;
+    double time_taken_in_seconds = ((double)t) / CLOCKS_PER_SEC;
+
+    return time_taken_in_seconds * 1000
 }

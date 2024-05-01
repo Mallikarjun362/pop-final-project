@@ -9,7 +9,7 @@
         exit(EXIT_FAILURE); \
     }
 
-int myStdCudnn(float* IMG_IN, float* IMG_OUT, float* FILTER_IN, int IMAGE_SIZE, int FILTER_SIZE) {
+double myStdCudnn(float* IMG_IN, float* IMG_OUT, float* FILTER_IN, int IMAGE_SIZE, int FILTER_SIZE) {
     // Initialize cuDNN
     cudnnHandle_t cudnn;
     cudnnCreate(&cudnn);
@@ -70,7 +70,7 @@ int myStdCudnn(float* IMG_IN, float* IMG_OUT, float* FILTER_IN, int IMAGE_SIZE, 
 
     cudnnGetConvolutionForwardAlgorithm_v7(cudnn, inputDesc, filterDesc, convDesc, outputDesc, 1, &numAlgos, &perfResults);
     algo = perfResults.algo;
-    printf("%d",algo);
+    // printf("%d",algo);
 
     // t = clock() - t;
     // double time_taken_in_seconds = ((double)t) / CLOCKS_PER_SEC;
@@ -92,29 +92,29 @@ int myStdCudnn(float* IMG_IN, float* IMG_OUT, float* FILTER_IN, int IMAGE_SIZE, 
     // Copy output from device to host
     cudaMemcpy(h_output, d_output, imgBytes, cudaMemcpyDeviceToHost);
 
-    printf("Time %f \n",time_taken_in_seconds * 1000);
+    // printf("Time %f \n",time_taken_in_seconds * 1000);
     // Print output
-    printf("Output image:\n");
-    for (int i = 0; i < IMAGE_SIZE - FILTER_SIZE + 1; ++i) {
-        for (int j = 0; j < IMAGE_SIZE - FILTER_SIZE + 1; ++j) {
-            printf("%f ", h_output[i * (IMAGE_SIZE - FILTER_SIZE + 1) + j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-    for (int i = 0; i < FILTER_SIZE; ++i) {
-        for (int j = 0; j < FILTER_SIZE; ++j) {
-            printf("%f ", FILTER_IN[i * FILTER_SIZE + j]);
-        }
-        printf("\n");
-    }
-    printf("\n");
-    for (int i = 0; i < IMAGE_SIZE; ++i) {
-        for (int j = 0; j < IMAGE_SIZE; ++j) {
-            printf("%f ", h_input[i * IMAGE_SIZE + j]);
-        }
-        printf("\n");
-    }
+    // printf("Output image:\n");
+    // for (int i = 0; i < IMAGE_SIZE - FILTER_SIZE + 1; ++i) {
+    //     for (int j = 0; j < IMAGE_SIZE - FILTER_SIZE + 1; ++j) {
+    //         printf("%f ", h_output[i * (IMAGE_SIZE - FILTER_SIZE + 1) + j]);
+    //     }
+    //     printf("\n");
+    // }
+    // printf("\n");
+    // for (int i = 0; i < FILTER_SIZE; ++i) {
+    //     for (int j = 0; j < FILTER_SIZE; ++j) {
+    //         printf("%f ", FILTER_IN[i * FILTER_SIZE + j]);
+    //     }
+    //     printf("\n");
+    // }
+    // printf("\n");
+    // for (int i = 0; i < IMAGE_SIZE; ++i) {
+    //     for (int j = 0; j < IMAGE_SIZE; ++j) {
+    //         printf("%f ", h_input[i * IMAGE_SIZE + j]);
+    //     }
+    //     printf("\n");
+    // }
 
     // Cleanup
     // free(h_input);
@@ -129,5 +129,5 @@ int myStdCudnn(float* IMG_IN, float* IMG_OUT, float* FILTER_IN, int IMAGE_SIZE, 
     cudnnDestroyConvolutionDescriptor(convDesc);
     cudnnDestroy(cudnn);
 
-    return 0;
+    return time_taken_in_seconds * 1000;
 }
