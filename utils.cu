@@ -1,12 +1,5 @@
-// -------------------- LIBRARIES ------------------------
-// #include <sys/time.h>
-// #include <stdlib.h>
-// #include <unistd.h>
-// #include <stdarg.h>
-// #include <string.h>
-// #include <stdio.h>
-// #include <time.h>
-// #include <cuda.h>
+#ifndef MY_UTILS
+#define MY_UTILS
 
 // --------------------- CONFIGURATION ---------------------
 // #define PERCENT_DIFF_ERROR_THRESHOLD 0.05
@@ -18,7 +11,7 @@
 // -------------------- UTIL CODE BLOCKS --------------------
 
 // INITIALIZE IMAGE
-void initializeImage(DATA_TYPE *IMG, const int height, const int width,)
+void initializeImage(DATA_TYPE *IMG, const int height, const int width)
 {
 	int i, j;
 
@@ -76,3 +69,4 @@ void resultAccuracy(DATA_TYPE *RES_H, DATA_TYPE *RES_CUDA, const int IMAGE_SIZE)
 	if (fail != 0)
 		printf("Failed instances: %d\n", fail);
 }
+#endif
