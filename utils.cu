@@ -18,15 +18,15 @@
 // -------------------- UTIL CODE BLOCKS --------------------
 
 // INITIALIZE IMAGE
-void initializeImage(DATA_TYPE *IMG, const int IMAGE_SIZE)
+void initializeImage(DATA_TYPE *IMG, const int height, const int width,)
 {
 	int i, j;
 
-	for (i = 0; i < IMAGE_SIZE; ++i)
+	for (i = 0; i < height; ++i)
 	{
-		for (j = 0; j < IMAGE_SIZE; ++j)
+		for (j = 0; j < width; ++j)
 		{
-			IMG[i * IMAGE_SIZE + j] = (float) rand() / RAND_MAX;
+			IMG[i * height + j] = (float) rand() / RAND_MAX;
 		}
 	}
 }
