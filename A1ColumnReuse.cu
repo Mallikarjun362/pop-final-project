@@ -102,26 +102,26 @@ double A2ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE
 
     cudaMemcpy(h_output, d_output, imgBytes, cudaMemcpyDeviceToHost);
     
-    printf("Input \n");
-    for (int i = 0; i < IMAGE_SIZE; ++i) {
-        for (int j = 0; j < IMAGE_SIZE; ++j) {
-            printf("%f ", IMG_IN[i * IMAGE_SIZE + j]);
-        }
-        printf("\n");
-    }
-    printf("Filter \n");
-    for (int i = 0; i < FILTER_SIZE; ++i) {
-        for (int j = 0; j < FILTER_SIZE; ++j) {
-            printf("%f ", FILTER_IN[i * FILTER_SIZE + j]);
-        }
-        printf("\n");
-    }
-    printf("Output:\n");
-    for (int i = 0; i < IMAGE_SIZE; ++i) {
-        for (int j = 0; j < IMAGE_SIZE; ++j) {
-            printf("%f ", (float) h_output[i * (IMAGE_SIZE) + j]);
-        }
-        printf("\n");
-    }
+    // printf("Input \n");
+    // for (int i = 0; i < IMAGE_SIZE; ++i) {
+    //     for (int j = 0; j < IMAGE_SIZE; ++j) {
+    //         printf("%f ", IMG_IN[i * IMAGE_SIZE + j]);
+    //     }
+    //     printf("\n");
+    // }
+    // printf("Filter \n");
+    // for (int i = 0; i < FILTER_SIZE; ++i) {
+    //     for (int j = 0; j < FILTER_SIZE; ++j) {
+    //         printf("%f ", FILTER_IN[i * FILTER_SIZE + j]);
+    //     }
+    //     printf("\n");
+    // }
+    // printf("Output:\n");
+    // for (int i = 0; i < IMAGE_SIZE; ++i) {
+    //     for (int j = 0; j < IMAGE_SIZE; ++j) {
+    //         printf("%f ", (float) h_output[i * (IMAGE_SIZE) + j]);
+    //     }
+    //     printf("\n");
+    // }
     return time_taken_in_seconds * 1000;
 }

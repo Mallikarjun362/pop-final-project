@@ -19,8 +19,8 @@ typedef float DATA_TYPE;
 #include "utils.cu"
 
 // 1. ALGORITHMS
-// #include "A1RowReuse.cu"
-#include "A2ColumnReuse.cu"
+#include "A1ColumnReuse.cu"
+// #include "A2RowReuse.cu"
 // #include "A3RowReuseModified.cu"
 // #include "A4ColumnReuseModified.cu"
 
@@ -60,13 +60,16 @@ int main(int argc, char *argv[])
 	double t_cudnn = myStdCudnn(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
 
 	// double t_a1 = A1(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
-	double t_a2 = A2ColumnReuse(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
+	double t_a1 = A1ColumnReuse(IMG_IN, IMG_OUT, FILTER_IN, IMAGE_SIZE, FILTER_SIZE);
 
 	// ------------------------------------------------------------------------ 
 	
-	printf("Host : %f\n",t_h);
-	printf("Cudnn : %f\n",t_cudnn);
-	printf("Column Reuse : %f\n",t_a2);
+	// printf("Host : %f\n",t_h);
+	// printf("Cudnn : %f\n",t_cudnn);
+	// printf("Column Reuse : %f\n",t_a2);
+
+	printf("H-t, CUDNN-t, CR-t, RR-t, CUDNN-sup, CR-sup, RR-sup")
+	printf("%f, %f, %f, %f, %f, %f, %f", t_h, t_cudnn, t_a1, 0, t_cudnn / t_h, t_a1 / t_h, 0 / t_h )
 	
 	// PART 3 : DISPLAY EXECUTION TIME
 	// free(IMG_IN);
