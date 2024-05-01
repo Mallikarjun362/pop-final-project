@@ -32,10 +32,17 @@ __global__ void convolution_kernel(
   // Apply column reuse optimization (Algorithm 1)
   if (tid < threads_per_block - 2) {
     unsigned long long exchange;
-    asm volatile ("mov.b64 %0, {%1, %2};" : "=l"(exchange) : "r"(iTemp[0]), "r"(iTemp[FILTER_WIDTH - 1]));
+    int temp1 = iTemp[0];
+    int temp2 = iTemp[FILTER_WIDTH - 1];
+    asm volatile ("mov.b64 %0, {%1, %2};" : "=l"(exchange) : "r"(temp1), "r"(temp2));
+    // asm volatile ("mov.b64 %0, {%1, %2};" : "=l"(exchange) : "r"(iTemp[0]), "r"(iTemp[FILTER_WIDTH - 1]));
     int shift = ((tid + 2) & 2) << 4;
-    asm volatile ("shr.b64 %0, %1, %2;" : "=l"(exchange) : "r"(exchange), "r"(shift));
-    asm volatile ("mov.b64 {%0, %1}, %2;" : "=r"(iTemp[1]), "=r"(iTemp[2]) : "l"(exchange));
+    asm volatile ("shr.b64 %0, %1, %2;" : "=l"(exchange) : "l"(exchange), "r"(shift));
+    // asm volatile ("mov.b64 {%0, %1}, %2;" : "=r"(iTemp[1]), "=r"(iTemp[2]) : "l"(exchange));
+    int temp3, temp4;
+    asm volatile ("mov.b64 {%0, %1}, %2;" : "=r"(temp3), "=r"(temp4) : "l"(exchange));
+    iTemp[1] = temp3;
+    iTemp[2] = temp4;
     iTemp[2] = __shfl_xor(iTemp[1], 2);
   }
   __syncthreads();
@@ -62,7 +69,9 @@ double A2ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE
     int imgBytes = IMAGE_SIZE * IMAGE_SIZE * sizeof(float);
     int filterBytes = FILTER_SIZE * FILTER_SIZE * sizeof(float);
 
-    float *d_input, *d_filter, *d_output;
+
+    float *d_input, *d_filter, *d_output, *h_output;
+    h_output = (float*) malloc(imgBytes);
     cudaMalloc(&d_input, imgBytes);
     cudaMalloc(&d_filter, filterBytes);
     cudaMalloc(&d_output, imgBytes);
@@ -87,5 +96,28 @@ double A2ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE
     t = clock() - t;
     double time_taken_in_seconds = ((double)t) / CLOCKS_PER_SEC;
 
+    cudaMemcpy(h_output, d_output, imgBytes, cudaMemcpyDeviceToHost);
+    
+    printf("Input \n");
+    for (int i = 0; i < IMAGE_SIZE; ++i) {
+        for (int j = 0; j < IMAGE_SIZE; ++j) {
+            printf("%f ", IMG_IN[i * IMAGE_SIZE + j]);
+        }
+        printf("\n");
+    }
+    printf("Filter \n");
+    for (int i = 0; i < FILTER_SIZE; ++i) {
+        for (int j = 0; j < FILTER_SIZE; ++j) {
+            printf("%f ", FILTER_IN[i * FILTER_SIZE + j]);
+        }
+        printf("\n");
+    }
+    printf("Output:\n");
+    for (int i = 0; i < IMAGE_SIZE - FILTER_SIZE + 1; ++i) {
+        for (int j = 0; j < IMAGE_SIZE - FILTER_SIZE + 1; ++j) {
+            printf("%f ", h_output[i * (IMAGE_SIZE - FILTER_SIZE + 1) + j]);
+        }
+        printf("\n");
+    }
     return time_taken_in_seconds * 1000;
 }
