@@ -47,8 +47,8 @@ int main(int argc, char *argv[])
 	IMG_OUT = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
 	FILTER_IN = (DATA_TYPE *)malloc(FILTER_SIZE_IN_BYTES);
 
-	initializeImage(IMG_IN, IMAGE_SIZE, IMAGE_SIZE);
-	initializeImage(FILTER_IN, FILTER_SIZE, FILTER_SIZE);
+	initializeImage(IMG_IN, IMAGE_SIZE);
+	initializeImage(FILTER_IN, FILTER_SIZE);
 
 	// ------------------------ PART 2 : COMPUTATION ------------------------
     // COMPUTING RESULTS
