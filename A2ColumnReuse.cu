@@ -1,6 +1,7 @@
 // CONVOLUTION CUDA
 #include <cuda.h>
 #include <cuda_runtime.h>
+#define FILTER_WIDTH 5
 
 __global__ void convolution_kernel(
     const float* input, const float* filter, float* output,
@@ -19,19 +20,19 @@ __global__ void convolution_kernel(
   if (output_x >= input_width || output_y >= input_height) return;
 
   // Calculate padding and stride (assuming padding = 1, stride = 1)
-  int padding = (filter_width - 1) / 2;
+  int padding = (FILTER_WIDTH - 1) / 2;
 
   // Temporary buffer for input elements
-  float iTemp[filter_width];
+  float iTemp[FILTER_WIDTH];
 
   // Load first and last elements for each thread
   iTemp[0] = input[(output_y * input_width) + output_x];
-  iTemp[filter_width - 1] = input[(output_y * input_width) + output_x + filter_width - 1];
+  iTemp[FILTER_WIDTH - 1] = input[(output_y * input_width) + output_x + FILTER_WIDTH - 1];
 
   // Apply column reuse optimization (Algorithm 1)
   if (tid < threads_per_block - 2) {
     unsigned long long exchange;
-    asm volatile ("mov.b64 %0, {%1, %2};" : "=l"(exchange) : "r"(iTemp[0]), "r"(iTemp[filter_width - 1]));
+    asm volatile ("mov.b64 %0, {%1, %2};" : "=l"(exchange) : "r"(iTemp[0]), "r"(iTemp[FILTER_WIDTH - 1]));
     int shift = ((tid + 2) & 2) << 4;
     asm volatile ("shr.b64 %0, %1, %2;" : "=l"(exchange) : "r"(exchange), "r"(shift));
     asm volatile ("mov.b64 {%0, %1}, %2;" : "=r"(iTemp[1]), "=r"(iTemp[2]) : "l"(exchange));
@@ -42,13 +43,13 @@ __global__ void convolution_kernel(
   // Perform convolution for the current output element
   float sum = 0.0f;
   for (int fy = 0; fy < filter_height; fy++) {
-    for (int fx = 0; fx < filter_width; fx++) {
+    for (int fx = 0; fx < FILTER_WIDTH; fx++) {
       int input_x = output_x + fx - padding;
       int input_y = output_y + fy - padding;
 
       // Check if within input bounds (ignoring padding)
       if (input_x >= 0 && input_x < input_width && input_y >= 0 && input_y < input_height) {
-        sum += iTemp[fx] * filter[(fy * filter_width) + fx];
+        sum += iTemp[fx] * filter[(fy * FILTER_WIDTH) + fx];
       }
     }
   }
@@ -79,12 +80,12 @@ double A2ColumnReuse(float* IMG_IN, float* IMG_OUT, float*  FILTER_IN, int IMAGE
     // Launch kernel
     clock_t t;
     t = clock();
-    
+
     convolution_kernel<<<grid_size, block_size>>>(d_input, d_filter, d_output, IMAGE_SIZE, IMAGE_SIZE, FILTER_SIZE, FILTER_SIZE);
     cudaDeviceSynchronize();
 
     t = clock() - t;
     double time_taken_in_seconds = ((double)t) / CLOCKS_PER_SEC;
 
-    return time_taken_in_seconds * 1000
+    return time_taken_in_seconds * 1000;
 }

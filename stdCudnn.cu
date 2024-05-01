@@ -15,8 +15,6 @@ double myStdCudnn(float* IMG_IN, float* IMG_OUT, float* FILTER_IN, int IMAGE_SIZ
     cudnnCreate(&cudnn);
 
     // Define image and filter dimensions
-    int IMAGE_SIZE = IMAGE_SIZE;  // Size of input image (assuming square image)
-    int FILTER_SIZE = FILTER_SIZE;  // Size of filter (assuming square filter)
     int imgBytes = IMAGE_SIZE * IMAGE_SIZE * sizeof(float);
     int filterBytes = FILTER_SIZE * FILTER_SIZE * sizeof(float);
 
@@ -28,7 +26,7 @@ double myStdCudnn(float* IMG_IN, float* IMG_OUT, float* FILTER_IN, int IMAGE_SIZ
     // float FILTER_IN[] = {2,0,0, 0,0,0, 0,0,0};
 
     // Initialize input image and filter
-    initializeImage(h_input, IMAGE_SIZE * IMAGE_SIZE);
+    // initializeImage(h_input, IMAGE_SIZE * IMAGE_SIZE);
     // initializeImage(FILTER_IN, FILTER_SIZE * FILTER_SIZE);
 
     // Allocate device memory for input image, filter, and output
@@ -38,7 +36,7 @@ double myStdCudnn(float* IMG_IN, float* IMG_OUT, float* FILTER_IN, int IMAGE_SIZ
     cudaMalloc(&d_output, imgBytes);
 
     // Copy input image and filter to device
-    cudaMemcpy(d_input, h_input, imgBytes, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_input, IMG_IN, imgBytes, cudaMemcpyHostToDevice);
     cudaMemcpy(d_filter, FILTER_IN, filterBytes, cudaMemcpyHostToDevice);
 
     // Define convolution parameters
