@@ -1,19 +1,19 @@
 // -------------------- LIBRARIES ------------------------
-#include <sys/time.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdio.h>
-#include <time.h>
-#include <cuda.h>
+// #include <sys/time.h>
+// #include <stdlib.h>
+// #include <unistd.h>
+// #include <stdarg.h>
+// #include <string.h>
+// #include <stdio.h>
+// #include <time.h>
+// #include <cuda.h>
 
 // --------------------- CONFIGURATION ---------------------
-#define PERCENT_DIFF_ERROR_THRESHOLD 0.05
-#define SMALL_FLOAT_VAL 0.00000001f
-#define THREAD_BLOCK_DIM_X 32
-#define THREAD_BLOCK_DIM_Y 32
-typedef float DATA_TYPE;
+// #define PERCENT_DIFF_ERROR_THRESHOLD 0.05
+// #define SMALL_FLOAT_VAL 0.00000001f
+// #define THREAD_BLOCK_DIM_X 32
+// #define THREAD_BLOCK_DIM_Y 32
+// typedef float DATA_TYPE;
 
 // -------------------- UTIL CODE BLOCKS --------------------
 

@@ -1,4 +1,5 @@
 // -------------------- STANDARD LIBRARIES ------------------------
+#include <cuda_runtime.h>
 #include <sys/time.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -8,17 +9,23 @@
 #include <time.h>
 #include <cuda.h>
 
+#define PERCENT_DIFF_ERROR_THRESHOLD 0.05
+#define SMALL_FLOAT_VAL 0.00000001f
+#define THREAD_BLOCK_DIM_X 32
+#define THREAD_BLOCK_DIM_Y 32
+typedef float DATA_TYPE;
+
 // ----------------------- CUSTOME LIBRARIES -----------------------
 // ALGORITHMS
-#include "A1RowReuse.cu"
-#include "A2ColumnReuse.cu"
-#include "A3RowReuseModified.cu"
-#include "A4ColumnReuseModified.cu"
+#include "utils.cu"
+// #include "A1RowReuse.cu"
+// #include "A2ColumnReuse.cu"
+// #include "A3RowReuseModified.cu"
+// #include "A4ColumnReuseModified.cu"
 // STANDARD IMPLEMENTATIONS
-#include "stdCudnn.cu"
+// #include "stdCudnn.cu"
 #include "stdHost.cu"
 // UTILITIES
-#include "utils.cu"
 
 // ----------------------- MAIN FUNCTION -------------------------
 int main(int argc, char *argv[])
@@ -31,26 +38,26 @@ int main(int argc, char *argv[])
 	int KERNEL_SIZE_IN_BYTES = sizeof(DATA_TYPE) * KERNEL_SIZE * KERNEL_SIZE;
 
 	// CPU-HOST VARIABLES
-	DATA_TYPE *IMG_IN;	                                   // PROBLEM VARIABLES
-	IMG_IN = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);       // MEMORY ALLOCATION
-	IMG_OUT = (DATA_TYPE *)malloc(IMG_SIZE_OUT_BYTES);       // MEMORY ALLOCATION
+	DATA_TYPE *IMG_IN, *IMG_OUT, *KERNEL_IN;
+	IMG_IN = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
+	IMG_OUT = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
 	KERNEL_IN = (DATA_TYPE *)malloc(KERNEL_SIZE_IN_BYTES);
-	initializeImage(IMG_IN, IMAGE_SIZE);                   // VARIABLES INITIALIZATION
+	initializeImage(IMG_IN, IMAGE_SIZE);
 	initializeImage(KERNEL_IN, KERNEL_SIZE);
 
 	// PART 2 : COMPUTATION
     // COMPUTING RESULTS
 	double t_h = myStdHost(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, KERNEL_SIZE);
-	// double t_cudnn = myStdCudnn(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, KERNEL_SIZE);
+	double t_cudnn = myStdCudnn(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, KERNEL_SIZE);
 
 	// double t_a1 = A1(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, KERNEL_SIZE);
 	// double t_a2 = A2(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, KERNEL_SIZE);
 	// double t_a3 = A3(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, KERNEL_SIZE);
 	// double t_a4 = A4(IMG_IN, IMG_OUT, KERNEL_IN, IMAGE_SIZE, KERNEL_SIZE);
-	
+	printf("Host : %f\n",t_h);
 	
 	// PART 3 : DISPLAY EXECUTION TIME
-	printf("END")
+	printf("END");
 	free(IMG_IN);
 	return 0;
 }

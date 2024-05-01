@@ -1,7 +1,3 @@
-#include <cuda_runtime.h>
-#include <cudnn.h>
-#include <stdio.h>
-
 // Error handling macro
 #define CHECK_CUDNN(expression)                                                 \
   do {                                                                          \
