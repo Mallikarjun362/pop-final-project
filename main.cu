@@ -41,18 +41,18 @@ int main(int argc, char *argv[])
 	int FILTER_SIZE_IN_BYTES = sizeof(DATA_TYPE) * FILTER_SIZE * FILTER_SIZE;
 
 	// CPU-HOST VARIABLES
-	// DATA_TYPE *IMG_IN, 
+	DATA_TYPE *IMG_IN;
   DATA_TYPE *IMG_OUT;
-  	// DATA_TYPE *FILTER_IN;
-  DATA_TYPE	FILTER_IN[] = {1,1,1, 1,1,1, 1,1,1};
-  DATA_TYPE	IMG_IN[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1};
+  DATA_TYPE *FILTER_IN;
+  // DATA_TYPE	FILTER_IN[] = {1,1,1, 1,1,1, 1,1,1};
+  // DATA_TYPE	IMG_IN[] = {1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1};
 	
-	// IMG_IN = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
+	IMG_IN = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
 	IMG_OUT = (DATA_TYPE *)malloc(IMG_SIZE_IN_BYTES);
-	// FILTER_IN = (DATA_TYPE *)malloc(FILTER_SIZE_IN_BYTES);
+	FILTER_IN = (DATA_TYPE *)malloc(FILTER_SIZE_IN_BYTES);
 
-	// initializeImage(IMG_IN, IMAGE_SIZE);
-	// initializeImage(FILTER_IN, FILTER_SIZE);
+	initializeImage(IMG_IN, IMAGE_SIZE);
+	initializeImage(FILTER_IN, FILTER_SIZE);
 
 	// ------------------------ PART 2 : COMPUTATION ------------------------
     // COMPUTING RESULTS
@@ -67,9 +67,10 @@ int main(int argc, char *argv[])
 	// printf("Host : %f\n",t_h);
 	// printf("Cudnn : %f\n",t_cudnn);
 	// printf("Column Reuse : %f\n",t_a2);
-
-	printf("H-t, CUDNN-t, CR-t, RR-t, CUDNN-sup, CR-sup, RR-sup")
-	printf("%f, %f, %f, %f, %f, %f, %f", t_h, t_cudnn, t_a1, 0, t_cudnn / t_h, t_a1 / t_h, 0 / t_h )
+  if(argv[2]){
+    printf("SIZE, H-t, CUDNN-t, CR-t, RR-t, CUDNN-sup, CR-sup, RR-sup\n");
+  }
+	printf("%d, %f, %f, %f, %f, %f, %f, %f \n", IMAGE_SIZE, t_h, t_cudnn, t_a1, 0.0, t_h / t_cudnn,  t_h / t_a1, 0.0 );
 	
 	// PART 3 : DISPLAY EXECUTION TIME
 	// free(IMG_IN);
